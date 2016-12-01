@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+<head>
+  <title>路由模板</title>
+  <style>
+    /* 全局 */
+    body { background: #f1f1f1; }
+
+    /* 首页 */
+    #page-home {}
+
+    /* 相关页 */
+    #page-show {}
+
+    /* 动画 */
+    .fade-enter-active, .fade-leave-active { transition: all .3s; }
+    .fade-enter { opacity: 0; }
+    .fade-leave-active { display: none; }
+
+    .slide-enter-active, .slide-leave-active { transition: all .3s; }
+    .slide-enter { transform: translateX(.3rem); opacity: 0; }
+    .slide-leave-active { display: none; }
+  </style>
+</head>
+<body>
+  <article id="app">
+    <header>hello Router!</header>
+    <section>
+      <router-link to="/page-home" replace>Go to Home</router-link>
+      <router-link to="/page-show" replace>Go to Show</router-link>
+    </section>
+    <transition name="slide">
+      <keep-alive>
+        <router-view :global="global"></router-view>
+      </keep-alive>
+    </transition>
+  </article>
+
+
+  <!-- 首页 -->
+  <script type="text/x-template" id="template-home">
+    <article id="page-home" title="首页">
+      page-home {{home}} {{global}}
+    </article>
+  </script>
+
+  <!-- 相关页 -->
+  <script type="text/x-template" id="template-show">
+    <article id="page-show" title="相关页">
+      page-show {{show}} {{global}}
+    </article>
+  </script>
+
+  <script src="js/vue.js"></script>
+  <script src="js/vue-router.js"></script>
+  <script src="js/zepto.js"></script>
+  <script>
+    var Home = {
+      template: '#template-home',
+      props: {
+        global: {
+          type: String,
+          required: true
+        }
+      },
+      data: function() {
+        return {
+          home: 'home'
+        }
+      },
+      beforeRouteEnter: function(to, from, next) {
+        next(function(vm) {
+          // 通过 `vm` 访问组件实例
+          ddb.setTitle(vm.$el.title);
+        });
+      },
+      beforeRouteLeave: function(to, from, next) {
+        // 可以访问组件实例 `this`
+        next();
+      }
+    };
+
+    var Show = {
+      template: '#template-show',
+      props: {
+        global: {
+          type: String,
+          required: true
+        }
+      },
+      data: function() {
+        return {
+          show: 'show'
+        }
+      },
+      beforeRouteEnter: function(to, from, next) {
+        next(function(vm) {
+          // 通过 `vm` 访问组件实例
+          ddb.setTitle(vm.$el.title);
+        });
+      }
+    };
+
+    // 创建一个路由器实例，定义路由映射，每条路由规则映射到一个组件
+    var router = new VueRouter({
+      // mode: 'hash', // "hash"(浏览器环境)|"history"|"abstract"(Node.js环境)
+      // base: '/', // 应用的基路径
+      // linkActiveClass: 'router-link-active', // 默认激活 class 类名
+      routes: [{
+        path: '/page-home',
+        component: Home
+      },{
+        path: '/page-show',
+        component: Show
+      },{
+        path: '*',
+        redirect:'/page-home' // 定义全局的重定向规则，重定向任意未匹配路径到 /home
+      }]
+    });
+
+    // 根组件构造器
+    var App = Vue.extend({
+      router: router,
+      data: function() {
+        return {
+          global: 'global'
+        }
+      }
+    });
+    // 创建 App 实例，并挂载到一个元素上。
+    new App().$mount('#app');
+  </script>
+</body>
+</html>
